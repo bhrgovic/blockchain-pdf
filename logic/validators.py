@@ -7,6 +7,10 @@ import base64
 
 class Validators:
 
+    def __init__(self, custom_config=None):
+        self.custom_config = custom_config
+
+
     @staticmethod
     def hash_block(block):
         block_string = json.dumps(block, sort_keys=True).encode()
