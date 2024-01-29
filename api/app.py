@@ -7,23 +7,46 @@ from logic.node import Node
 from logic.networking import PeerNetwork
 from logic.pbft import PBFT
 from logic.cloud_storage_utils import CloudUtils
+from werkzeug.utils import secure_filename
+from pymongo.mongo_client import MongoClient
+from pymongo.server_api import ServerApi
+from bson.json_util import dumps
+from dotenv import load_dotenv
+from data.block import Block
+from logic.complex_encoder import ComplexEncoder
 import traceback
 import requests
 import hashlib
-from werkzeug.utils import secure_filename
+import json
+import os
 
+
+load_dotenv()
+mongo_connection_string = os.getenv('MONGO')
 app = Flask(__name__)
 socketio = SocketIO(app)
 network = PeerNetwork()
 pbft_instance = PBFT()
-file_blockchain = FileBlockchain()
+client = MongoClient(mongo_connection_string)
+db = client['blockchainpdf']
+
+def load_blockchain_from_file(filename):
+    with open(filename, 'r') as f:
+        blockchain_dict = json.load(f)
+    if not blockchain_dict:
+        return FileBlockchain()
+    blockchain = FileBlockchain()
+    blockchain.chain = blockchain_dict['chain']
+    blockchain.transaction_pool = blockchain_dict['transaction_pool']
+    return blockchain
 
 
-file_blockchain = FileBlockchain(is_primary=True)
+file_blockchain = load_blockchain_from_file('blockchain.json')
 pool = TransactionPool(file_blockchain)
 
 
-
+transaction_collection = db['transactions']
+blocks_collection = db['blocks']
 
 @socketio.on('connect')
 def handle_connect():
@@ -32,14 +55,11 @@ def handle_connect():
 @socketio.on('transaction')
 def handle_transaction(transaction):
     try:
-        # Validate the transaction
         if 'pdf_data' not in transaction or 'pdf_name' not in transaction:
             raise ValueError("Invalid transaction format")
 
-        # Add the transaction to the transaction pool
         pool.add_transaction_to_pool(transaction)
 
-        # Broadcast the transaction to all connected clients
         emit('transaction', transaction, broadcast=True)
 
     except Exception as e:
@@ -73,15 +93,14 @@ def search_blockchain():
 @app.route('/add_pdf', methods=['POST'])
 def add_pdf():
     try:
-        
-
+        print("MongoDB connection string:", mongo_connection_string)
         file = request.files['file']
         file_path = secure_filename(file.filename)
         file.save(file_path)
 
         # Calculate the hash of the file
         with open(file_path, "rb") as f:
-           file_hash = hashlib.sha256(f.read()).hexdigest()
+            file_hash = hashlib.sha256(f.read()).hexdigest()
 
         # Create a new block with the file hash and add it to the blockchain
         block = file_blockchain.create_new_block(file_hash)
@@ -89,6 +108,11 @@ def add_pdf():
         network.broadcast_prepare(block, pbft_instance, file_blockchain)
         network.broadcast_commit(block, file_blockchain)
         file_blockchain.chain.append(block)
+
+        block_info = block.to_dict()
+
+        # Save the block to the database
+        blocks_collection.insert_one(block_info)
 
         # Upload the file to Azure Blob Storage
         cloud_utils = CloudUtils()
@@ -98,19 +122,20 @@ def add_pdf():
     except Exception as e:
         app.logger.error(f"An error occurred: {e}")
         return 'Failed to add PDF', 500
-    
 
 @app.route('/transactions', methods=['GET'])
 def get_all_transactions():
     try:
         # Get all blocks from the blockchain
-        blocks = file_blockchain.chain
+        blocks = blocks_collection.find()
 
-        return jsonify({"status": "success", "blocks": blocks}), 200
+        # Convert the blocks to JSON
+        blocks_json = dumps(blocks)
+
+        return jsonify({"status": "success", "blocks": blocks_json}), 200
     except Exception as e:
         traceback.print_exc()
         return jsonify({"status": "error", "message": str(e)}), 500
-    
 
 @app.route('/send_request', methods=['POST'])
 def send_request():
@@ -129,6 +154,15 @@ def send_request():
     except Exception as e:
         traceback.print_exc()
         return jsonify({"status": "error", "message": str(e)}), 500
+    
+
+def save_blockchain():
+    blockchain_dict = {
+        'chain': file_blockchain.chain,
+        'transaction_pool': file_blockchain.transaction_pool
+    }
+    with open('blockchain.json', 'w') as f:
+        json.dump(blockchain_dict, f, cls=ComplexEncoder,indent=4)
 
 @app.errorhandler(404)
 def not_found(error):

@@ -5,6 +5,7 @@ from .networking import PeerNetwork
 import time
 import hashlib
 import json
+from data.block import Block
 
 
 class FileBlockchain:
@@ -62,23 +63,26 @@ class FileBlockchain:
             # get the last block in the blockchain
             last_block = self.chain[-1]
             previous_hash = last_block['hash']
-
+        print('a')
         # create a new block with the given data
-        new_block = {
-            'index': len(self.chain),
-            'timestamp': time.time(),
-            'data': data,
-            'previous_hash': previous_hash,
-        }
-
+        new_block = Block(len(self.chain), data, previous_hash)
+        print('b')
         # calculate the hash of the new block
-        new_block['hash'] = self.calculate_hash(new_block)
+        new_block.calculate_hash()
 
         return new_block
-    
+
     def calculate_hash(self, block):
         # create a string representation of the block
         block_string = json.dumps(block, sort_keys=True)
 
         # calculate the SHA-256 hash of the block string
         return hashlib.sha256(block_string.encode()).hexdigest()
+    
+
+    def to_dict(self):
+        return {
+            'chain': self.chain,
+            'transaction_pool': self.transaction_pool,
+            # Include other attributes as needed
+        }
