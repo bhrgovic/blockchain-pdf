@@ -1,6 +1,6 @@
 import unittest
 from flask_testing import TestCase
-from api.app import app, file_blockchain
+from blueprints.app import app, file_blockchain
 from urllib.parse import quote
 
 class TestSearchEndpoint(TestCase):
