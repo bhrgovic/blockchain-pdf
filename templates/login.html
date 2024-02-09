@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login - Academic Blockchain</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+    <style>
+        :root {
+            --primary-color: #007bff; /* Your primary color */
+        }
+
+        body {
+            background-image: url('/static/backg.jpg'); /* Your background image */
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+        }
+
+        .navbar, .btn-primary {
+            background-color: var(--primary-color);
+        }
+
+        .text-primary, .form-control:focus {
+            color: var(--primary-color);
+        }
+
+        .centered-form {
+            max-width: 400px;
+            margin: auto;
+            background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent background */
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.1); /* subtle shadow */
+        }
+
+        .white-text-with-black-outline {
+            color: white;
+            text-shadow:
+                -1px -1px 0 #000,
+                1px -1px 0 #000,
+                -1px  1px 0 #000,
+                1px  1px 0 #000; /* Shadow in all directions */
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-light navbar-black">
+        <a class="navbar-brand" href="#">Academic Blockchain</a>
+    </nav>
+    <div class="container">
+        <div class="row">
+            <div class="col-12 d-flex justify-content-center align-items-center" style="height: 100vh;">
+                <div class="centered-form text-center">
+                    <h1 class="white-text-with-black-outline">Login</h1>
+                    <form id="loginForm" method="post">
+                        <input type="email" name="email" required class="form-control" placeholder="Enter email">
+                        <input type="password" name="password" required class="form-control" placeholder="Password">
+                        <button type="submit" class="btn btn-primary">Login</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="/static/auth.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

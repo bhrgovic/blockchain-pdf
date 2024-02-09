@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Console - Academic Blockchain</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <nav class="navbar navbar-light">
+        <a class="navbar-brand" href="#">Academic Blockchain</a>
+        <div class="ml-auto">
+            <!-- User email will be updated by auth.js -->
+            <span class="navbar-text mr-3">Hello, <span id="userEmail"></span></span>
+            <button class="btn btn-outline-danger btn-danger" onclick="logout();">Logout</button>
+        </div>
+    </nav>
+    <div class="container">
+        <div class="text-center mt-5 white-text-with-black-outline">
+            <h1>Welcome to the Admin Console</h1>
+            <a href="/review_chain" class="btn btn-primary mt-3">Review Chain Data</a>
+            <a href="/add_diploma" class="btn btn-secondary mt-3">Add Diploma to the Chain</a>
+        </div>
+    </div>
+    <script>document.addEventListener('DOMContentLoaded', () => {
+        fetchProtectedData('/admin_home');
+    });
+    </script>
+    <script src="/static/auth.js"></script>
+    <script src="/static/authRedirect.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

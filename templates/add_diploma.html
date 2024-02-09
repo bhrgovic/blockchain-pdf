@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Diploma - Academic Blockchain</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <nav class="navbar navbar-light">
+        <a class="navbar-brand" href="#">Academic Blockchain</a>
+        <div class="ml-auto">
+            <span class="navbar-text mr-3">Hello, <span id="userEmail"></span></span>
+            <button class="btn btn-outline-danger btn-danger" onclick="logout();">Logout</button>
+        </div>
+    </nav>
+    <div class="container">
+        <div class="text-center mt-5 white-text-with-black-outline">
+            <h1>Add a Diploma to the Blockchain</h1>
+            <p class="mt-4">
+                Enter the email address associated with the diploma and select the file to upload.
+                The diploma will be verified and added to the blockchain.
+            </p>
+            <form id="diplomaForm" enctype="multipart/form-data">
+                <input type="email" class="form-control mb-3" id="emailInput" name="email" placeholder="Enter email address" required pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$" title="Please enter a valid email address">
+                <input type="file" class="form-control-file mb-3" id="diplomaFile" name="file" required>
+                <button type="submit" class="btn btn-primary">Submit Diploma</button>
+            </form>
+        </div>
+    </div>
+    <script src="/static/auth.js"></script>
+    <script src="/static/authRedirect.js"></script>
+    <script>
+    function addDiploma(file, email) {
+        let formData = new FormData();
+        formData.append('file', file);
+        formData.append('email', email);
+
+        fetch('/add_pdf', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to add diploma with status: ' + response.status);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Diploma added successfully:', data);
+            alert('Diploma added successfully.');
+        })
+        .catch(error => {
+            console.error('Error adding diploma:', error);
+            alert('Failed to add diploma. Error: ' + error.message);
+        });
+    }
+
+    document.getElementById('diplomaForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        var fileInput = document.getElementById('diplomaFile');
+        var emailInput = document.getElementById('emailInput');
+        if(fileInput.files.length === 0) {
+            alert('Please select a file to upload.');
+            return;
+        }
+        var file = fileInput.files[0];
+        var email = emailInput.value;
+        addDiploma(file, email);
+    });
+    </script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

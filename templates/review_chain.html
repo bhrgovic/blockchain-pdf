@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Review Chain - Academic Blockchain</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+    <style>
+        :root {
+            --primary-color: #007bff; /* Your primary color */
+        }
+
+        body {
+            background-image: url('/static/backg.jpg');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            font-size: 0.9em; /* Smaller font size */
+        }
+
+        .navbar, .btn-primary {
+            background-color: var(--primary-color);
+        }
+
+        .table-container {
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.1);
+            margin-top: 20px;
+        }
+
+        .table {
+            table-layout: fixed; /* Fixed table layout */
+            width: 100%; /* Full width */
+        }
+
+        .table td, .table th {
+            word-wrap: break-word; /* Break words to prevent overflow */
+        }
+
+        .collapse-row-content {
+            max-height: 200px; /* Maximum height for expanded content */
+            overflow-y: auto; /* Make it scrollable */
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-light navbar-black">
+        <a class="navbar-brand" href="#">Academic Blockchain</a>
+        <div class="ml-auto">
+            <span class="navbar-text mr-3">Hello, <span id="userEmail">user@example.com</span></span>
+            <button class="btn btn-outline-danger" onclick="logout();">Logout</button>
+        </div>
+    </nav>
+    <div class="container table-container">
+        <h2 class="text-center">Blockchain Transactions</h2>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Index</th>
+                    <th>Data (Preview)</th>
+                    <th>Email</th>
+                    <th>Hash</th>
+                    <th>Previous Hash</th>
+                </tr>
+            </thead>
+            <tbody id="transactionsTableBody">
+                <!-- Transaction rows will go here -->
+            </tbody>
+        </table>
+    </div>
+    <script>
+        function fetchTransactions() {
+            fetch('/transactions')
+                .then(response => response.json())
+                .then(data => {
+                    if(data.status === "success") {
+                        populateTable(data.blocks);
+                    } else {
+                        console.error('Failed to fetch transactions:', data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        }
+
+        function populateTable(blocks) {
+            const tableBody = document.getElementById('transactionsTableBody');
+            blocks.forEach((block, index) => {
+                let row = `
+                    <tr data-toggle="collapse" data-target="#collapseRow${index}" class="clickable">
+                        <td>${block.index}</td>
+                        <td>${block.data.substring(0, 30)}...</td>
+                        <td>${block.email}</td>
+                        <td>${block.hash.substring(0, 30)}...</td>
+                        <td>${block.previous_hash ? block.previous_hash.substring(0, 30) : 'N/A'}...</td>
+                    </tr>
+                    <tr id="collapseRow${index}" class="collapse">
+                        <td colspan="5">
+                            <div class="collapse-row-content">
+                            Data: ${block.data}<br>
+                            Hash: ${block.hash}<br>
+                            Previous Hash: ${block.previous_hash ? block.previous_hash : 'N/A'}
+                        </td>
+                    </tr>
+                `;
+                tableBody.innerHTML += row;
+            });
+        }
+
+        fetchTransactions();
+    </script>
+    <script src="/static/auth.js"></script>
+    <script src="/static/authRedirect.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
