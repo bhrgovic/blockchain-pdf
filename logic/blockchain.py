@@ -1,88 +1,77 @@
-
-from .validators import Validators
 from .pbft import PBFT
 from .networking import PeerNetwork
 import time
 import hashlib
 import json
 from data.block import Block
+from databse import blocks_collection
 
 
 class FileBlockchain:
-    def __init__(self, is_primary=False):
+    def __init__(self):
         self.chain = []
-        self.is_primary = is_primary
-        self.transaction_pool = []
-        self.pbft = PBFT()
-        self.network = PeerNetwork()
-        self.current_phase = None
-        self.prepare_count = 0
-        self.commit_count = 0
-        self.validator = Validators()
 
-    def set_primary(self, is_primary):
-        self.is_primary = is_primary
 
-    def add_transaction(self, transaction):
-        self.transaction_pool.append(transaction)
+    def get_chain(self):
+        # Return the blockchain as a list of dictionaries
+        return [block.to_dict() for block in self.chain]
 
-    def reply(self,data):
-        if self.commit_count == 1:
-            self.current_phase = "reply"
-            self.chain.append({"index": len(self.chain), "data": data})
-            print("Added block to the blockchain")
-            return True
-        return False
+    @classmethod   
+    def load_blockchain_from_mongodb(self):
 
-    def search_pdf(self, pdf_name):
-        # Search for the PDF in the blockchain
+        blockchain = FileBlockchain()
+        # Load and add blocks to the blockchain
+        for block_data in blocks_collection.find().sort("index", 1):
+            #print(block_data)
+            block_data.pop('_id', None)
+            # Assuming you have a method to convert dict to a Block object
+            block = Block.from_dict(block_data)
+            blockchain.chain.append(block)
+
+        print(blockchain.to_dict())
+        return blockchain
+
+    def search_pdf(self, email):
+        # Search for the email in the blockchain
         for block in self.chain:
-            if block.get("data") == pdf_name:
-                return block.get("data")
+            if block.email == email:
+                return True
 
-        # Search for the PDF in the transaction pool
-        for tx in self.transaction_pool:
-            if tx.get("data") == pdf_name:
-                return tx.get("data")
-
-        # If pdf_name is not found, return None
-        return None
-
+        # If email is not found, return False
+        return False
     
-    def add_pdf(self, pdf):
-        # Add the PDF to the blockchain or transaction pool
-        # This is just a placeholder implementation. You'll need to replace it with your actual implementation.
-        self.chain.append({"transactions": [{"pdf_name": pdf["pdf_name"], "pdf_data": pdf["pdf_data"]}]})
-
-
-    def create_new_block(self, data):
+    
+    def create_new_block(self,email, data):
         # check if it's the genesis block
         if len(self.chain) == 0:
             previous_hash = None
         else:
             # get the last block in the blockchain
             last_block = self.chain[-1]
-            previous_hash = last_block['hash']
-        print('a')
+            previous_hash = last_block.hash
+        print('prije konstruktora,prev hash: ', previous_hash)
         # create a new block with the given data
-        new_block = Block(len(self.chain), data, previous_hash)
-        print('b')
+        new_block = Block(len(self.chain), data,email, previous_hash)
+        
+        print('poslije konstruktora,previous hash:' , new_block.previous_hash)
         # calculate the hash of the new block
         new_block.calculate_hash()
-
         return new_block
-
-    def calculate_hash(self, block):
-        # create a string representation of the block
-        block_string = json.dumps(block, sort_keys=True)
-
-        # calculate the SHA-256 hash of the block string
-        return hashlib.sha256(block_string.encode()).hexdigest()
-    
 
     def to_dict(self):
         return {
-            'chain': self.chain,
-            'transaction_pool': self.transaction_pool,
-            # Include other attributes as needed
+            'chain': self.chain
         }
+
+    def get_last_block(self):
+        if len(self.chain) > 0:
+            # Return the last block in the chain
+            return self.chain[len(self.chain)-1]
+        else:
+            return None
+        
+    def get_next_index(self):
+        if len(self.chain) > 0:
+            return self.chain[-1].index + 1
+        else:
+            return 0

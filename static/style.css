@@ -1,0 +1,44 @@
+/* style.css */
+:root {
+    --primary-color: #007bff; /* Your primary color */
+}
+
+body {
+    background-image: url('/static/backg.jpg'); /* Your background image */
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
+
+.navbar, .btn-primary {
+    background-color: var(--primary-color);
+}
+
+.text-primary, .form-control:focus {
+    color: var(--primary-color);
+}
+.centered-form {
+    max-width: 400px;
+    margin: auto;
+    background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent background */
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.1); /* subtle shadow */
+}
+
+.white-text-with-black-outline {
+    color: white;
+    text-shadow:
+        -1px -1px 0 #000,
+        1px -1px 0 #000,
+        -1px  1px 0 #000,
+        1px  1px 0 #000; /* Shadow in all directions */
+}
+
+.navbar-black {
+    background-color: #000;
+}
+
+.navbar-text {
+    color: white;
+}

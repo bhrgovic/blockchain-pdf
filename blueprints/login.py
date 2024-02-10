@@ -1,6 +1,6 @@
-from flask import Blueprint, jsonify, request, render_template,redirect,url_for
+from flask import Blueprint, jsonify, request, render_template,redirect,url_for,make_response
 from bson.json_util import dumps
-from extensions import file_blockchain,network,pbft_instance,login_manager
+from extensions import file_blockchain,network,pbft_instance
 import traceback
 import hashlib
 from databse import users
@@ -27,12 +27,13 @@ def login():
         print(f"Received password: {password}")  # Print the received password
         user = User.load_user(email)
         print(f"Loaded user: {user}")  # Print the loaded user
-        if user:
-            print(f"User password hash: {user.password}")  # Print the user's password hash
-            print(f"Check password: {check_password_hash(user.password, password)}")  # Print the result of the password check
         if user and check_password_hash(user.password, password):
             access_token = create_access_token(identity=email)
-            return {'access_token': access_token}, 200
+            print(access_token)
+            response = make_response({'message': 'Login successful','access_token' : access_token}, 200)
+            response.set_cookie('access_token_cookie', access_token)
+            response.set_cookie('user_email', email)  # Set email in cookies
+            return response
         return {'message': 'Invalid username/password'}, 401
     return render_template('login.html')
 

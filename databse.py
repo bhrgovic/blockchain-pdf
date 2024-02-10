@@ -1,8 +1,11 @@
 from pymongo import MongoClient
 from config import Config
+import os
+from dotenv import load_dotenv
 
-client = MongoClient(Config.MONGO_URI)
+load_dotenv()
+
+client = MongoClient(os.getenv("MONGO"))
 db = client['blockchainpdf']
 blocks_collection = db['blocks']
-transaction_collection = db['transactions']
 users= db['users']

@@ -1,38 +1,43 @@
 from flask import Flask
 from config import Config
-from extensions import socketio, jwt, login_manager, session, cors
+from extensions import session
 import databse
-from socket_events import register_socketio_events
 import os
+from dotenv import load_dotenv
+from flask_cors import CORS
+from flask_jwt_extended import JWTManager
 
 from data.user import User 
 
-@login_manager.user_loader
-def load_user(user_id):
-    user = User.load_user(user_id)
-    print(user_id)
-    return  user
+
+
 
 def create_app():
-    app = Flask(__name__)
-    app.config.from_object(Config)
-    app.config['JWT_SECRET_KEY'] = os.getenv('JWT')
-
+    load_dotenv()
+    app = Flask(__name__,template_folder='templates')
+    print(os.getenv('JWT'))
+    #app.config['SECRET_KEY'] = os.getenv('JWT', 'fallback_secret_key')
+    app.config['SECRET_KEY'] = 'hardcoded_secret_key_for_testing'
+    app.config["JWT_SECRET_KEY"] = os.getenv("JWT")
+    app.config['JWT_TOKEN_LOCATION'] = ['cookies']
     # Initialize Extensions
-    socketio.init_app(app)
-    jwt.init_app(app)
-    login_manager.init_app(app)
-    #session.init_app(app)
-    cors.init_app(app)
-    
+    #socketio.init_app(app)
+    jwt = JWTManager(app)
+    CORS(
+         app,
+        resources={
+            r"/*": {
+                "origins": ["http://localhost:5000", "http://localhost:19000"],
+                "methods": ["GET", "POST", "OPTIONS", "PUT", "DELETE"],
+                "supports_credentials": True,
+                "allow_headers": ["Content-Type", "Authorization", "X-Requested-With"],
+                "expose_headers": ["Content-Type"],
+            }
+        },
+    )
 
-    register_socketio_events(socketio)
+    session.init_app(app)
 
-    # ... additional configurations like error handlers
-
+    print(app.config)
     return app
 
-app = create_app()
-
-if __name__ == '__main__':
-    socketio.run(app, debug=True)
