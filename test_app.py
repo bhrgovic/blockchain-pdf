@@ -18,7 +18,7 @@ def send_pdf_to_server(url, file_path, email):
 # Example usage
 if __name__ == "__main__":
     url = 'http://localhost:5000/add_pdf'
-    file_path = '/blank.pdf'  # Update this path
+    file_path = 'blank.pdf'  # Update this path
     email = 'pi3@test.com'
 
     response = send_pdf_to_server(url, file_path, email)
