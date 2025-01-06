@@ -24,7 +24,7 @@ class PBFT:
     def commit(self, block, file_blockchain):
         self.current_phase = "commit"
         self.commit_count += 1
-        print('commit count:' + str(self.commit_count))
+        #print('commit count:' + str(self.commit_count))
         # Assuming commit logic passed, add block to chain
         if self.commit_count > self.total_nodes / 2:  # More than half of the nodes have committed
             #file_blockchain.create_new_block(block.email,block.data)

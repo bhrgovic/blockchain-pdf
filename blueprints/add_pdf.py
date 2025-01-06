@@ -8,17 +8,19 @@ from data.block import Block
 import traceback
 import hashlib
 import base64
+import time
 
 pdf_blueprint = Blueprint('pdf_blueprint', __name__)
 
 @pdf_blueprint.route('/add_pdf', methods=['POST'])
 def add_pdf():
     try:
+        start_time = time.time()
         file = request.files['file']
         email = request.form.get('email')
         file_path = secure_filename(file.filename)
         file.save(file_path)
-
+        
         with open(file_path, "rb") as f:
             file_data = f.read()
             base64_encoded_data = base64.b64encode(file_data).decode()
@@ -55,13 +57,15 @@ def add_pdf():
                 if network.broadcast_prepare(new_block, pbft_instance,blockchain):
                     if network.broadcast_commit(new_block,pbft_instance, blockchain):
                         blockchain.chain.append(new_block)
-                        print(new_block.previous_hash)
+                        #print(new_block.previous_hash)
                         block_info = new_block.to_dict()
-                        print(block_info['previous_hash'])
+                        #print(block_info['previous_hash'])
                         blocks_collection.insert_one(block_info)
                         # cloud_utils = CloudUtils()
                         # cloud_utils.upload_blob(file_path, file_hash)
 
+                        end_time = time.time()
+                        print(f'New block addition took {end_time - start_time:.2f} seconds')
                         return jsonify({'message': 'PDF added successfully'}), 200
             else: 
                 return jsonify({'error': 'Invalid block'}), 400
