@@ -24,7 +24,7 @@ def add_pdf():
         with open(file_path, "rb") as f:
             file_data = f.read()
             base64_encoded_data = base64.b64encode(file_data).decode()
-        print(blockchain.chain)
+        #print(blockchain.chain)
         last_block = blockchain.get_last_block()
         next_index = blockchain.get_next_index()
         if last_block is None:

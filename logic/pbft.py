@@ -8,7 +8,7 @@ class PBFT:
     def pre_prepare(self, block, file_blockchain):
         self.current_phase = "pre_prepare"
         #print("in pbft class pre preapare ***************************************************************************")
-        print(self.total_nodes)
+        #print(self.total_nodes)
         # Assuming pre_prepare logic passed, move to prepare phase
         return True
 

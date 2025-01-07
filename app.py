@@ -13,8 +13,8 @@ import time
 from data.user import User 
 
 LOG_FORMAT = "%(levelname)s %(asctime)s - %(message)s"
-logging.basicConfig(filename='system_monitoring.log', level=logging.DEBUG, format=LOG_FORMAT, filemode='w')
-logger = logging.getLogger()
+logging.basicConfig(filename='system_monitoring.log', level=logging.INFO, format=LOG_FORMAT, filemode='w')
+logger = logging.getLogger('resource_monitoring')
 
 app = Flask(__name__)
 
@@ -23,19 +23,19 @@ def resource_monitoring():
         cpu_usage = psutil.cpu_percent(interval=1)
         memory = psutil.virtual_memory()
         logger.info(f"CPU Usage: {cpu_usage}%, Memory Usage: {memory.percent}%")
-        time.sleep(60)  # Log every 60 seconds
+        time.sleep(10)  # Log every 60 seconds
 
 
 def start_monitoring():
     thread = threading.Thread(target=resource_monitoring)
-    thread.daemon = True  # Daemon thread will shut down when main thread exits
+    thread.daemon = True  # Daemon thread will shut down when the main thread exits
     thread.start()
 
 
 def create_app():
     load_dotenv()
     app = Flask(__name__,template_folder='templates')
-    print(os.getenv('JWT'))
+    #print(os.getenv('JWT'))
     #app.config['SECRET_KEY'] = os.getenv('JWT', 'fallback_secret_key')
     app.config['SECRET_KEY'] = 'hardcoded_secret_key_for_testing'
     app.config["JWT_SECRET_KEY"] = os.getenv("JWT")
@@ -58,6 +58,6 @@ def create_app():
 
     session.init_app(app)
     start_monitoring()
-    print(app.config)
+    #print(app.config)
     return app
 

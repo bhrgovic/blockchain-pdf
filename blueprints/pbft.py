@@ -9,11 +9,11 @@ view_pbft = Blueprint('view_pbft',__name__)
 def pre_prepare():
     block_data = request.get_json()
     block = Block.from_dict(block_data)  # Assuming you have a method to reconstruct a block from JSON data
-    print(f"Received pre_prepare with block: {block}")
+    #print(f"Received pre_prepare with block: {block}")
     # Validate the block
     last_block = blockchain.get_last_block()
     if Block.validate(block,last_block):  # Assuming you have a validate_block method
-        print('validating in pre preapare')
+        #print('validating in pre preapare')
         pbft_instance.pre_prepare(block, blockchain)
     return jsonify({"status": "success"}), 200
 

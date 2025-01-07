@@ -28,7 +28,7 @@ class FileBlockchain:
             block = Block.from_dict(block_data)
             blockchain.chain.append(block)
 
-        print(blockchain.to_dict())
+        #print(blockchain.to_dict())
         return blockchain
 
     def search_pdf(self, email):
@@ -49,11 +49,11 @@ class FileBlockchain:
             # get the last block in the blockchain
             last_block = self.chain[-1]
             previous_hash = last_block.hash
-        print('prije konstruktora,prev hash: ', previous_hash)
+        #print('prije konstruktora,prev hash: ', previous_hash)
         # create a new block with the given data
         new_block = Block(len(self.chain), data,email, previous_hash)
         
-        print('poslije konstruktora,previous hash:' , new_block.previous_hash)
+        #print('poslije konstruktora,previous hash:' , new_block.previous_hash)
         # calculate the hash of the new block
         new_block.calculate_hash()
         return new_block
