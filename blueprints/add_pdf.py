@@ -51,6 +51,7 @@ def add_pdf():
             new_block = blockchain.create_new_block(email,base64_encoded_data)
             #print(new_block.to_dict())
             if not new_block.validate(last_block):
+                #print("invalid")
                 return jsonify({'error': 'Invalid block'}), 400
 
             if network.broadcast_pre_prepare(new_block,pbft_instance, blockchain):

@@ -9,28 +9,38 @@ from flask_jwt_extended import JWTManager
 import psutil
 import threading
 import logging
+from datetime import datetime
 import time
 from data.user import User 
 
-LOG_FORMAT = "%(levelname)s %(asctime)s - %(message)s"
-logging.basicConfig(filename='system_monitoring.log', level=logging.INFO, format=LOG_FORMAT, filemode='w')
+# Create and configure logger for resource monitoring
 logger = logging.getLogger('resource_monitoring')
+logger.setLevel(logging.INFO)
+file_handler = logging.FileHandler('system_metrics.csv', mode='w')  # Open in write mode to overwrite old data on each run
+formatter = logging.Formatter('%(message)s')  # Use custom formatter suitable for CSV
+file_handler.setFormatter(formatter)
+logger.addHandler(file_handler)
 
-app = Flask(__name__)
+# Write headers to the CSV file
+with open('system_metrics.csv', 'w') as f:
+    f.write('Timestamp,CPU Frequency (MHz),CPU Usage (%),Memory Usage (%)\n')
 
 def resource_monitoring():
     while True:
+        cpu_frequency = psutil.cpu_freq().current if psutil.cpu_freq() else 'Unavailable'
         cpu_usage = psutil.cpu_percent(interval=1)
         memory = psutil.virtual_memory()
-        logger.info(f"CPU Usage: {cpu_usage}%, Memory Usage: {memory.percent}%")
-        time.sleep(10)  # Log every 60 seconds
+        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        log_message = f"{timestamp},{cpu_frequency},{cpu_usage},{memory.percent}"
+        logger.info(log_message)
+        time.sleep(5)  # Adjust as needed
 
+app = Flask(__name__)
 
 def start_monitoring():
     thread = threading.Thread(target=resource_monitoring)
-    thread.daemon = True  # Daemon thread will shut down when the main thread exits
+    thread.daemon = True
     thread.start()
-
 
 def create_app():
     load_dotenv()
